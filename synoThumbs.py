@@ -53,7 +53,7 @@ def makePicThumbs(imagePath,loglevel,forceupdate):
                 os.chmod(thumbPath, stat.S_IRWXU | stat.S_IRWXO | stat.S_IRWXG)
                 print thumbPath + " created"
             else:
-                print "ERROR while creating " + "thumbPath"
+                print "ERROR while creating " + thumbPath
             
 def walkMediaDir(dir,loglevel,forceupdate):
     for root,dirs,names in os.walk(dir):
