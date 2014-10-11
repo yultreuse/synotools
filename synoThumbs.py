@@ -15,6 +15,7 @@ import sys
 import os
 import argparse
 import shutil
+import stat
 
 thumbSpec = {}
 thumbSpec['XL'] = ("SYNOPHOTO_THUMB_XL.jpg","1280","min")
@@ -49,6 +50,7 @@ def makePicThumbs(imagePath,loglevel,forceupdate):
             outArgs = "-vf " + vfilter + " '" + thumbPath + "'"
             os.system("ffmpeg " + inArgs + " " + outArgs)
             if os.path.isfile(thumbPath):
+                os.chmod(thumbPath, stat.S_IRWXU | stat.S_IRWXO | stat.S_IRWXG)
                 print thumbPath + " created"
             else:
                 print "ERROR while creating " + "thumbPath"
