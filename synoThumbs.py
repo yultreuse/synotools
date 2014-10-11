@@ -28,7 +28,7 @@ operators['max'] = 'lt'
 
 picExts = ['.jpg','.JPG','.jpeg','.JPEG','.png','.PNG','.bmp','.BMP','.tif','.TIF']
 
-def makePicThumbs(imagePath):
+def makePicThumbs(imagePath,loglevel):
     picDir,picName = os.path.split(imagePath)
     thumbsDir = os.path.join(picDir,eaDir)
     if not os.path.isdir(thumbsDir):
@@ -41,12 +41,15 @@ def makePicThumbs(imagePath):
         thumbPath = os.path.join(curPicThumbsDir,name)
         if not os.path.exists(thumbPath):
             vfilter = "\"scale='if(lt(iw,%s)*lt(ih,%s),-1,if(%s(iw,ih),-1,%s))':'if(lt(iw,%s)*lt(ih,%s),-1,if(%s(iw,ih),%s,-1))'\"" % (size,size,operators[spec],size,size,size,operators[spec],size)
-            inArgs = "-loglevel quiet -y -i '" + imagePath + "'"
+            inArgs = "-loglevel %s -y -f image2 -i '%s'" % (loglevel,imagePath)
             outArgs = "-vf " + vfilter + " '" + thumbPath + "'"
             os.system("ffmpeg " + inArgs + " " + outArgs)
-            print thumbPath + " created"
+            if os.path.isfile(thumbPath):
+                print thumbPath + " created"
+            else:
+                print "ERROR while creating " + "thumbPath"
             
-def walkMediaDir(dir):
+def walkMediaDir(dir,loglevel):
     for root,dirs,names in os.walk(dir):
         for filename in names:
             picPath = os.path.join(root,filename)
@@ -54,11 +57,15 @@ def walkMediaDir(dir):
                 base,ext = os.path.splitext(filename)
                 if ext in picExts :
                     print 'handling ' + picPath
-                    makePicThumbs(picPath)
+                    makePicThumbs(picPath,loglevel)
             
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate thumbnails for DS photo 6')
     parser.add_argument("FOLDER",help="FOLDER is a valid directory path containing photo to index")
+    parser.add_argument("-l","--loglevel",help="Specify ffmpeg loglevel from quiet|panic|fatal|error|warning|info|verbose")
     args = vars(parser.parse_args())
-    walkMediaDir(args['FOLDER'])
+    if args['loglevel'] is None:
+        args['loglevel'] = 'quiet'
+    
+    walkMediaDir(args['FOLDER'],args['loglevel'])
     
