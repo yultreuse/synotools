@@ -14,6 +14,7 @@ version : 0.1
 import sys
 import os
 import argparse
+import shutil
 
 thumbSpec = {}
 thumbSpec['XL'] = ("SYNOPHOTO_THUMB_XL.jpg","1280","min")
@@ -28,12 +29,15 @@ operators['max'] = 'lt'
 
 picExts = ['.jpg','.JPG','.jpeg','.JPEG','.png','.PNG','.bmp','.BMP','.tif','.TIF']
 
-def makePicThumbs(imagePath,loglevel):
+def makePicThumbs(imagePath,loglevel,forceupdate):
     picDir,picName = os.path.split(imagePath)
     thumbsDir = os.path.join(picDir,eaDir)
     if not os.path.isdir(thumbsDir):
         os.mkdir(thumbsDir)
     curPicThumbsDir = os.path.join(thumbsDir,picName)
+    if forceupdate:
+        if os.path.isdir(curPicThumbsDir):
+            shutil.rmtree(curPicThumbsDir)
     if not os.path.isdir(curPicThumbsDir):
         os.mkdir(curPicThumbsDir)
         
@@ -49,7 +53,7 @@ def makePicThumbs(imagePath,loglevel):
             else:
                 print "ERROR while creating " + "thumbPath"
             
-def walkMediaDir(dir,loglevel):
+def walkMediaDir(dir,loglevel,forceupdate):
     for root,dirs,names in os.walk(dir):
         for filename in names:
             picPath = os.path.join(root,filename)
@@ -57,15 +61,17 @@ def walkMediaDir(dir,loglevel):
                 base,ext = os.path.splitext(filename)
                 if ext in picExts :
                     print 'handling ' + picPath
-                    makePicThumbs(picPath,loglevel)
+                    makePicThumbs(picPath,loglevel,forceupdate)
             
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate thumbnails for DS photo 6')
     parser.add_argument("FOLDER",help="FOLDER is a valid directory path containing photo to index")
     parser.add_argument("-l","--loglevel",help="Specify ffmpeg loglevel from quiet|panic|fatal|error|warning|info|verbose")
+    parser.add_argument("-f","--force-update",action="store_true",help="force creation of thumbnails : erase previous thumbs if any")
     args = vars(parser.parse_args())
+
     if args['loglevel'] is None:
         args['loglevel'] = 'quiet'
     
-    walkMediaDir(args['FOLDER'],args['loglevel'])
+    walkMediaDir(args['FOLDER'],args['loglevel'],args['force_update'])
     
