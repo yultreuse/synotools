@@ -13,6 +13,7 @@ version : 0.1
 '''
 import sys
 import os
+import argparse
 
 thumbSpec = {}
 thumbSpec['XL'] = ("SYNOPHOTO_THUMB_XL.jpg","1280","min")
@@ -48,12 +49,16 @@ def makePicThumbs(imagePath):
 def walkMediaDir(dir):
     for root,dirs,names in os.walk(dir):
         for filename in names:
-            if eaDir not in filename:
+            picPath = os.path.join(root,filename)
+            if eaDir not in picPath:
                 base,ext = os.path.splitext(filename)
                 if ext in picExts :
-                    picPath = os.path.join(root,filename)
                     print 'handling ' + picPath
                     makePicThumbs(picPath)
             
 if __name__ == "__main__":
-    walkMediaDir(sys.argv[1])
+    parser = argparse.ArgumentParser(description='Generate thumbnails for DS photo 6')
+    parser.add_argument("FOLDER",help="FOLDER is a valid directory path containing photo to index")
+    args = vars(parser.parse_args())
+    walkMediaDir(args['FOLDER'])
+    
