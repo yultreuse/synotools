@@ -16,6 +16,7 @@ import os
 import argparse
 import shutil
 import stat
+import subprocess
 
 thumbSpec = {}
 thumbSpec['XL'] = ("SYNOPHOTO_THUMB_XL.jpg","1280","min")
@@ -32,6 +33,12 @@ picExts = ['.jpg','.JPG','.jpeg','.JPEG','.png','.PNG','.bmp','.BMP','.tif','.TI
 
 red = '\033[0;31m'
 nc = '\033[0m'
+
+def getFFProbeDic(mediaPath):
+    process = subprocess.Popen(['ffprobe','-loglevel','quiet','-show_streams','-of','json',mediaPath],stdout=subprocess.PIPE)
+    dic = eval(process.stdout.read())
+    process.stdout.close()
+    return dic
 
 def makePicThumbs(imagePath,loglevel,forceupdate):
     picDir,picName = os.path.split(imagePath)
@@ -68,6 +75,7 @@ def walkMediaDir(dir,loglevel,forceupdate):
                     print 'handling ' + picPath
                     makePicThumbs(picPath,loglevel,forceupdate)
             
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate thumbnails for DS photo 6')
     parser.add_argument("FOLDER",help="FOLDER is a valid directory path containing photo to index")
@@ -79,4 +87,3 @@ if __name__ == "__main__":
         args['loglevel'] = 'quiet'
     
     walkMediaDir(args['FOLDER'],args['loglevel'],args['force_update'])
-    
