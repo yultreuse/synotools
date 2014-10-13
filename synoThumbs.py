@@ -30,6 +30,9 @@ operators['max'] = 'lt'
 
 picExts = ['.jpg','.JPG','.jpeg','.JPEG','.png','.PNG','.bmp','.BMP','.tif','.TIF']
 
+red = '\033[0;31m'
+nc = '\033[0m'
+
 def makePicThumbs(imagePath,loglevel,forceupdate):
     picDir,picName = os.path.split(imagePath)
     thumbsDir = os.path.join(picDir,eaDir)
@@ -53,7 +56,7 @@ def makePicThumbs(imagePath,loglevel,forceupdate):
                 os.chmod(thumbPath, stat.S_IRWXU | stat.S_IRWXO | stat.S_IRWXG)
                 print thumbPath + " created"
             else:
-                print "ERROR while creating " + thumbPath
+                print red + "ERROR while creating " + thumbPath + nc
             
 def walkMediaDir(dir,loglevel,forceupdate):
     for root,dirs,names in os.walk(dir):
