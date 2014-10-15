@@ -24,9 +24,9 @@ thumbSpec['M'] = ("SYNOPHOTO_THUMB_M.jpg","320","min")
 thumbSpec['PREVIEW'] = ("SYNOPHOTO_THUMB_PREVIEW.jpg","256","max")
 
 vidSpec = {}
-vidSpec['FLV']  = ("SYNOPHOTO_FILM.flv","480","-c:a libfaac -b:a 96k -ar 48000","-c:v libx264 -preset faster")
-vidSpec['MP4']  = ("SYNOPHOTO_FILM_CONVERT_MPEG4.mp4","360","-c:a libfaac -b:a 96k -ar 48000","-c:v mpeg4 -q:v 16")
-vidSpec['H264']  = ("SYNOPHOTO_FILM_H264.mp4","-1","-c:a libfaac -b:a 128k -ar 48000","-c:v libx264 -preset faster -crf 24")
+vidSpec['FLV']  = ("SYNOPHOTO_FILM.flv","480","-c:a libfaac -b:a 64k -ar 48000","-c:v libx264 -preset faster","1250000")
+vidSpec['MP4']  = ("SYNOPHOTO_FILM_CONVERT_MPEG4.mp4","360","-c:a libfaac -b:a 64k -ar 48000","-c:v mpeg4","600000")
+vidSpec['H264']  = ("SYNOPHOTO_FILM_H264.mp4","-1","-c:a libfaac -b:a 128k -ar 48000","-c:v libx264 -preset faster","6000000")
 
 eaDir = '@eaDir'
 
@@ -92,8 +92,7 @@ def makeMovThumbs(movPath,curMovThumbsDir,loglevel):
                     print red + "ERROR while creating " + thumbPath + nc
 
     # Make video thumbnails
-    for k,(name,size,aspec,vspec) in vidSpec.iteritems():
-        # for all but H264
+    for k,(name,size,aspec,vspec,vbr) in vidSpec.iteritems():
         thumbPath = os.path.join(curMovThumbsDir,name)
         if not os.path.exists(thumbPath):
             
@@ -103,11 +102,14 @@ def makeMovThumbs(movPath,curMovThumbsDir,loglevel):
                 os.symlink(os.path.join('../..',basename), os.path.join(curMovThumbsDir,name))
                 print thumbPath + " created"
             
-            else:    
+            else:
+                videobitrate = str(min(int(videoStream['bit_rate']),int(vbr)))
                 vfilter = "\"scale='if(gcd(%s*dar,2),%s*dar-1,%s*dar)':%s:1\"" % (size,size,size,size)
                 inArgs = "-loglevel %s -y -i '%s'" % (loglevel,movPath)
-                outArgs = aspec + " " + vspec + " -vf " + vfilter + " '" + thumbPath + "'"
-                os.system("ffmpeg " + inArgs + " " + outArgs)
+                outArgs = aspec + " " + vspec + " -vf " + vfilter + " -b:v " + videobitrate
+
+                # Call 2 pass encoding                
+                os.system("ffmpeg " + inArgs + " " + outArgs + " -pass 1 -f " + name.split('.')[-1] + " /dev/null && ffmpeg " + inArgs + " " + outArgs + " -pass 2 '" + thumbPath + "'")
                 
                 if os.path.isfile(thumbPath):
                     os.chmod(thumbPath, stat.S_IRWXU | stat.S_IRWXO | stat.S_IRWXG)
