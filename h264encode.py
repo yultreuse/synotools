@@ -27,8 +27,8 @@ def youtubeVideoBitrate(height):
     out = int(-3.85*h*h+15240*h-3965000)
     
     # Forbid too low bitrates
-    if out<250000:
-        out = 250000
+    if out<300000:
+        out = 300000
         
     return out    
 
@@ -51,9 +51,6 @@ if __name__ == "__main__":
     inDic = getFFProbeDic(args['INPUT'])
     inDir,inName = os.path.split(args['INPUT'])
     inBase,inExt = os.path.splitext(inName)
-    print inBase
-    print inExt
-    print inDic
     if len(inDic['streams'])>2:
         print yellow + "Warning : input file has more than 2 streams" + nc
 
@@ -96,6 +93,8 @@ if __name__ == "__main__":
                 
             if os.path.isfile(outFilePath):
                 print outFilePath + " created"
+                if args['delete_source']:
+                    os.remove(args['INPUT'])
             else:
                 print red + "ERROR while creating " + outFilePath + nc
 
