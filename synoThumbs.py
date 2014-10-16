@@ -134,6 +134,7 @@ def makeMovThumbs(movPath,curMovThumbsDir,loglevel):
 
                 # Call 2 pass encoding                
                 os.system("ffmpeg " + inArgs + " " + vidOpt + " " + audOpt + " -pass 1 /dev/null && ffmpeg " + inArgs + " " + vidOpt + " " + audOpt + " -pass 2 '" + thumbPath + "'")
+                cleanFFMpeg2PassFiles()
                 
                 if os.path.isfile(thumbPath):
                     os.chmod(thumbPath, stat.S_IRWXU | stat.S_IRWXO | stat.S_IRWXG)

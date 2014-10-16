@@ -9,6 +9,7 @@ version : 0.1
 '''
 
 import subprocess
+import os
 
 def getFFProbeDic(mediaPath):
     process = subprocess.Popen(['ffprobe','-loglevel','quiet','-show_streams','-of','json',mediaPath],stdout=subprocess.PIPE)
@@ -29,3 +30,7 @@ def youtubeVideoBitrate(height):
         out = 300000
         
     return out
+
+def cleanFFMpeg2PassFiles():
+    os.remove("ffmpeg2pass-0.log")
+    os.remove("ffmpeg2pass-0.log.mbtree")

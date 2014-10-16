@@ -66,6 +66,7 @@ if __name__ == "__main__":
                 targetVidBR = min(int(videoStream['bit_rate']),youtubeVideoBitrate(videoStream['height']))
                 vidOpt = "-f mp4 -c:v libx264 -preset fast -b:v " + str(targetVidBR)
                 os.system("ffmpeg " + inArgs + " " + vidOpt + " " + audOpt + " -pass 1 /dev/null && ffmpeg " + inArgs + " " + vidOpt + " " + audOpt + " -pass 2 '" + outFilePath + "'")
+                cleanFFMpeg2PassFiles()
                 
             if os.path.isfile(outFilePath):
                 print outFilePath + " created"
