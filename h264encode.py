@@ -23,9 +23,14 @@ yellow = '\033[0;33m'
 nc = '\033[0m'
 
 def youtubeVideoBitrate(height):
-    print height
     h = int(height)
-    return int(-3.85*h*h+15240*h-3965000)
+    out = int(-3.85*h*h+15240*h-3965000)
+    
+    # Forbid too low bitrates
+    if out<250000:
+        out = 250000
+        
+    return out    
 
 def getFFProbeDic(mediaPath):
     process = subprocess.Popen(['ffprobe','-loglevel','quiet','-show_streams','-of','json',mediaPath],stdout=subprocess.PIPE)
