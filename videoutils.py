@@ -32,5 +32,7 @@ def youtubeVideoBitrate(height):
     return out
 
 def cleanFFMpeg2PassFiles():
-    os.remove("ffmpeg2pass-0.log")
-    os.remove("ffmpeg2pass-0.log.mbtree")
+    for path in ["ffmpeg2pass-0.log","ffmpeg2pass-0.log.mbtree"]:
+        if os.path.isfile(path):
+            os.remove(path)
+

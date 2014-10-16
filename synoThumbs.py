@@ -6,7 +6,7 @@ Use :
     Generate thumbnails for synology DS photo 6
     Prerequisite : mount photo volumes in NFS on the machine you want
     this script to be executed.
-    Launch the script doing so : $ ./synoThumbs /path/to/photo/folder
+    Launch the script doing so : $ ./synoThumbs.py /path/to/photo/folder
 
 Dependencies : ffmpeg modern build, with many codecs...
 version : 0.1
@@ -25,9 +25,9 @@ thumbSpec['M'] = ("SYNOPHOTO_THUMB_M.jpg","320","min")
 thumbSpec['PREVIEW'] = ("SYNOPHOTO_THUMB_PREVIEW.jpg","256","max")
 
 vidSpec = {}
-vidSpec['FLV']  = ("SYNOPHOTO_FILM.flv","480","-c:a libfaac -ac 2 -ar 48000","-c:v libx264 -preset faster","64000","1250000")
-vidSpec['MP4']  = ("SYNOPHOTO_FILM_CONVERT_MPEG4.mp4","360","-c:a libfaac -ac 2 -ar 48000","-c:v mpeg4","64000","600000")
-vidSpec['H264']  = ("SYNOPHOTO_FILM_H264.mp4","-1","-c:a libfaac -ac 2 -ar 48000","-c:v libx264 -preset faster","128000","6000000")
+vidSpec['FLV']  = ("SYNOPHOTO_FILM.flv","480","-c:a libfaac -ar 48000","-c:v libx264 -preset faster","64000","1250000")
+vidSpec['MP4']  = ("SYNOPHOTO_FILM_CONVERT_MPEG4.mp4","360","-c:a libfaac -ar 48000","-c:v mpeg4","64000","600000")
+vidSpec['H264']  = ("SYNOPHOTO_FILM_H264.mp4","-1","-c:a libfaac -ar 48000","-c:v libx264 -preset faster","128000","6000000")
 
 eaDir = '@eaDir'
 
