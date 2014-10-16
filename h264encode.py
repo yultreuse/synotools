@@ -74,7 +74,8 @@ if __name__ == "__main__":
             # Build output path
             outFileName = inBase + "-h264.mp4"
             outFilePath = os.path.join(inDir,outFileName)
-            audOpt = "-c:a libfaac -b:a 128k -ac 2 -ar 48000"
+            targetAudBR = min(int(audioStream['bit_rate']),128000)
+            audOpt = "-c:a libfaac -b:a %d -ac 2 -ar 48000" % targetAudBR
             inArgs = "-y -loglevel %s -i '%s'" % (args['loglevel'],args['INPUT'])
 
             # If only audio transcode needed
@@ -88,6 +89,11 @@ if __name__ == "__main__":
                 vidOpt = "-f mp4 -c:v libx264 -preset fast -b:v " + str(targetVidBR)
                 os.system("ffmpeg " + inArgs + " " + vidOpt + " " + audOpt + " -pass 1 /dev/null && ffmpeg " + inArgs + " " + vidOpt + " " + audOpt + " -pass 2 '" + outFilePath + "'")
                 
+            if os.path.isfile(outFilePath):
+                print outFilePath + " created"
+            else:
+                print red + "ERROR while creating " + outFilePath + nc
+
 
     else:
         print red + "Fail to locate suitable streams in input file" + nc
