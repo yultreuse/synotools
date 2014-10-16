@@ -18,6 +18,7 @@ import shutil
 import stat
 
 from videoutils import *
+from h264encode import h264Encode
 
 thumbSpec = {}
 thumbSpec['XL'] = ("SYNOPHOTO_THUMB_XL.jpg","1280","min")
@@ -164,6 +165,16 @@ def walkMediaDir(dir,loglevel,forceupdate,forcevideoupdate):
                             if os.path.isdir(curPicThumbsDir):
                                 shutil.rmtree(curPicThumbsDir)
                     
+                    # Transcode source movie to h264
+                    if ext in movExts and forcevideoupdate:
+                        h264Encode(mediaPath,loglevel,True,"-h264.mp4")
+                        mediaBase,mediaExt = os.path.splitext(mediaPath)
+                        newMediaPath = mediaBase + "-h264.mp4"
+                        if os.path.exists(newMediaPath):
+                            mediaPath = newMediaPath
+                            mediaDir,mediaName = os.path.split(mediaPath)
+                            curPicThumbsDir = os.path.join(thumbsDir,mediaName)
+                                
                     # Create media thumb dir if needed
                     if not os.path.isdir(curPicThumbsDir):
                         os.mkdir(curPicThumbsDir)
@@ -172,7 +183,7 @@ def walkMediaDir(dir,loglevel,forceupdate,forcevideoupdate):
                     if ext in picExts:
                         makePicThumbs(mediaPath,curPicThumbsDir,loglevel)
                     
-                    if ext in movExts:
+                    if ext in movExts:                                
                         makeMovThumbs(mediaPath,curPicThumbsDir,loglevel)
             
 
