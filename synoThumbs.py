@@ -16,7 +16,8 @@ import os
 import argparse
 import shutil
 import stat
-import subprocess
+
+from videoutils import *
 
 thumbSpec = {}
 thumbSpec['XL'] = ("SYNOPHOTO_THUMB_XL.jpg","1280","min")
@@ -24,9 +25,9 @@ thumbSpec['M'] = ("SYNOPHOTO_THUMB_M.jpg","320","min")
 thumbSpec['PREVIEW'] = ("SYNOPHOTO_THUMB_PREVIEW.jpg","256","max")
 
 vidSpec = {}
-vidSpec['FLV']  = ("SYNOPHOTO_FILM.flv","480","-c:a libfaac -b:a 64k -ar 48000","-c:v libx264 -preset faster","1250000")
-vidSpec['MP4']  = ("SYNOPHOTO_FILM_CONVERT_MPEG4.mp4","360","-c:a libfaac -b:a 64k -ar 48000","-c:v mpeg4","600000")
-vidSpec['H264']  = ("SYNOPHOTO_FILM_H264.mp4","-1","-c:a libfaac -b:a 128k -ar 48000","-c:v libx264 -preset faster","6000000")
+vidSpec['FLV']  = ("SYNOPHOTO_FILM.flv","480","-c:a libfaac -ac 2 -ar 48000","-c:v libx264 -preset faster","64000","1250000")
+vidSpec['MP4']  = ("SYNOPHOTO_FILM_CONVERT_MPEG4.mp4","360","-c:a libfaac -ac 2 -ar 48000","-c:v mpeg4","64000","600000")
+vidSpec['H264']  = ("SYNOPHOTO_FILM_H264.mp4","-1","-c:a libfaac -ac 2 -ar 48000","-c:v libx264 -preset faster","128000","6000000")
 
 eaDir = '@eaDir'
 
@@ -37,14 +38,23 @@ operators['max'] = 'lt'
 picExts = ['.jpg','.JPG','.jpeg','.JPEG','.png','.PNG','.bmp','.BMP','.tif','.TIF']
 movExts = ['.mov','.MOV','.avi','.AVI','.mts','.MTS','.mp4','.MP4','.mpg','.MPG','.mpeg','.MPEG']
 
-red = '\033[0;31m'
-nc = '\033[0m'
-
-def getFFProbeDic(mediaPath):
-    process = subprocess.Popen(['ffprobe','-loglevel','quiet','-show_streams','-of','json',mediaPath],stdout=subprocess.PIPE)
-    dic = eval(process.stdout.read())
-    process.stdout.close()
-    return dic
+# return vfilter string
+def computeFilter(idar,oh):
+    l = map(float,idar.split(':'))
+    dar = l[0]/l[1]
+    h = float(oh)
+    vfilter = ""
+    if oh == "-1":
+        vfilter = "scale=-1:-1:1"
+    else:
+        w = int(dar*h)
+        w = w - (w % 2)
+        h = int(h)
+        vfilter = "scale=%d:%d:1" % (w,h)
+    
+    return vfilter
+        
+        
 
 def makePicThumbs(imagePath,curPicThumbsDir,loglevel):        
     for name,size,spec in thumbSpec.itervalues():
@@ -92,7 +102,7 @@ def makeMovThumbs(movPath,curMovThumbsDir,loglevel):
                     print red + "ERROR while creating " + thumbPath + nc
 
     # Make video thumbnails
-    for k,(name,size,aspec,vspec,vbr) in vidSpec.iteritems():
+    for k,(name,size,aspec,vspec,abr,vbr) in vidSpec.iteritems():
         thumbPath = os.path.join(curMovThumbsDir,name)
         if not os.path.exists(thumbPath):
             
@@ -103,13 +113,27 @@ def makeMovThumbs(movPath,curMovThumbsDir,loglevel):
                 print thumbPath + " created"
             
             else:
-                videobitrate = str(min(int(videoStream['bit_rate']),int(vbr)))
-                vfilter = "\"scale='if(gcd(%s*dar,2),%s*dar-1,%s*dar)':%s:1\"" % (size,size,size,size)
+                # Compute Video bitrate (must not exceed source)
+                targetVidBR = str(min(int(videoStream['bit_rate']),int(vbr)))
+                
+                # Compute Video size (must not exceed source)
+                targetVidH  = size
+                if (int(size)>int(videoStream['height'])):
+                    targetVidH = "-1"
+                
+                # Compute scale filter
+                vfilter = computeFilter(videoStream['display_aspect_ratio'], targetVidH)
+                vidOpt = "-f " + name.split('.')[-1] + " " + vspec + " -b:v " + targetVidBR + " -vf " + vfilter
+                
+                # Compute Audio bitrate
+                targetAudBR = str(min(int(audioStream['bit_rate']),int(abr)))
+                audOpt = aspec + " -b:a " + targetAudBR
+                
+                # Input arguments
                 inArgs = "-loglevel %s -y -i '%s'" % (loglevel,movPath)
-                outArgs = aspec + " " + vspec + " -vf " + vfilter + " -b:v " + videobitrate
 
                 # Call 2 pass encoding                
-                os.system("ffmpeg " + inArgs + " " + outArgs + " -pass 1 -f " + name.split('.')[-1] + " /dev/null && ffmpeg " + inArgs + " " + outArgs + " -pass 2 '" + thumbPath + "'")
+                os.system("ffmpeg " + inArgs + " " + vidOpt + " " + audOpt + " -pass 1 /dev/null && ffmpeg " + inArgs + " " + vidOpt + " " + audOpt + " -pass 2 '" + thumbPath + "'")
                 
                 if os.path.isfile(thumbPath):
                     os.chmod(thumbPath, stat.S_IRWXU | stat.S_IRWXO | stat.S_IRWXG)
