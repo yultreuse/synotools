@@ -31,8 +31,7 @@ def youtubeVideoBitrate(height):
         
     return out
 
-def cleanFFMpeg2PassFiles():
-    for path in ["ffmpeg2pass-0.log","ffmpeg2pass-0.log.mbtree"]:
-        if os.path.isfile(path):
-            os.remove(path)
+def cleanFFMpeg2PassFiles(passLogFile="ffmpeg2pass"):
+    pattern = passLogFile + "*"
+    os.system("rm -f " + pattern)
 
