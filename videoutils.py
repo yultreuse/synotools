@@ -12,7 +12,7 @@ import subprocess
 import os
 
 def getFFProbeDic(mediaPath):
-    process = subprocess.Popen(['ffprobe','-loglevel','quiet','-show_streams','-of','json',mediaPath],stdout=subprocess.PIPE)
+    process = subprocess.Popen(['ffprobe','-loglevel','quiet','-show_streams','-show_format','-of','json',mediaPath],stdout=subprocess.PIPE)
     dic = eval(process.stdout.read())
     process.stdout.close()
     return dic
