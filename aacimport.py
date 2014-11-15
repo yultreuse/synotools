@@ -47,11 +47,11 @@ def main(pattern):
                     outputFile = ""
                     if artist is not "" and  title is not "":
                         if track is not "":
-                            outputFile = artist + " - " + track + " - " + title + ".mp3"
+                            outputFile = artist + " - " + track + " - " + title + ".mp4"
                         else:
-                            outputFile = artist + " - " + title + ".mp3"
+                            outputFile = artist + " - " + title + ".mp4"
                     else:                       
-                        outputFile =  os.path.join(outRoot,flac.rstrip("flac") + "mp3")
+                        outputFile =  os.path.join(outRoot,flac.rstrip("flac") + "mp4")
                         
                     # Grab first video stream & first audio stream
                     videoStream = None
@@ -73,7 +73,7 @@ def main(pattern):
                     else:
                         vidOpt = "-vn"
                                 
-                    audOpt = "-b:a 192k -sample_fmt s16p -id3v2_version 3 -ar 44100"                                            
+                    audOpt = "-b:a 128k -c:a libfdk_aac -sample_fmt s16 -id3v2_version 3 -ar 44100"                                            
                     
                     d[inputFile] = (outputFile,vidOpt,audOpt)
 
@@ -93,7 +93,7 @@ def main(pattern):
 
     for flac,(mp3,vidOpt,audOpt) in todo.iteritems():
         print "handling " + flac
-        command = 'ffmpeg -y -loglevel quiet -i "' + flac + '" ' + vidOpt + ' ' + audOpt + ' "' + mp3 + '"'        
+        command = 'ffmpeg -y -loglevel info -i "' + flac + '" ' + vidOpt + ' ' + audOpt + ' "' + mp3 + '"'        
         os.system(command)
 
 
