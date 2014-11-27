@@ -12,10 +12,62 @@ import subprocess
 import os
 
 def getFFProbeDic(mediaPath):
-    process = subprocess.Popen(['ffprobe','-loglevel','quiet','-show_streams','-show_format','-of','json',mediaPath],stdout=subprocess.PIPE)
+    process = subprocess.Popen(['ffprobe','-loglevel','quiet','-show_streams','-of','json',mediaPath],stdout=subprocess.PIPE)
     dic = eval(process.stdout.read())
     process.stdout.close()
     return dic
+
+def getFFProbeTags(mediaPath):
+    process = subprocess.Popen(['ffprobe','-loglevel','quiet','-show_format','-of','json',mediaPath],stdout=subprocess.PIPE)
+    dic = eval(process.stdout.read())
+    process.stdout.close()
+    parsedTags = {}
+    tags = dic['format']['tags']
+    
+    # Parse album
+    albumKeys = ['ALBUM','album']
+    for k in albumKeys:
+        if k in tags:
+            parsedTags['album'] = tags[k].split(";")[0]
+            break
+            
+    # Parse artist
+    albumKeys = ['ARTIST','artist','album_artist']
+    for k in albumKeys:
+        if k in tags:
+            parsedTags['artist'] = tags[k].split(";")[0]
+            break
+            
+    # Parse Title
+    albumKeys = ['TITLE','title']
+    for k in albumKeys:
+        if k in tags:
+            parsedTags['title'] = tags[k].split(";")[0]
+            break
+            
+    # Parse Date
+    albumKeys = ['DATE','date']
+    for k in albumKeys:
+        if k in tags:
+            parsedTags['date'] = tags[k].split(";")[0]
+            break
+            
+    # Parse Genre
+    albumKeys = ['GENRE','genre']
+    for k in albumKeys:
+        if k in tags:
+            parsedTags['genre'] = tags[k].split(";")[0]
+            break
+        
+    # Parse Date
+    albumKeys = ['track']
+    for k in albumKeys:
+        if k in tags:
+            parsedTags['track'] = "%02d" % int(tags[k].split(";")[0]) 
+            break
+        
+    return parsedTags
+
 
 red = '\033[0;31m'
 yellow = '\033[0;33m'

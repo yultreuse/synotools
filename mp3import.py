@@ -20,40 +20,39 @@ def main(pattern):
             for flac in files:
                 if flac.endswith("flac"):
                     inputFile  = os.path.join(inRoot,flac)
-                    dico = getFFProbeDic(inputFile)
                     
-                    # First build file name, parsing tags
-                    artist = ""
-                    tags = dico['format']['tags']
-                    if "ARTIST" in tags:
-                        artist = tags["ARTIST"]
-                    elif "artist" in tags:
-                        artist = tags["artist"]
-                    elif "album_artist" in tags:
-                        artist = tags["album_artist"]
-                        
-                    track = ""
-                    if "track" in tags:
-                        track = "%02d" % int(tags["track"])
-                    elif "TRACK" in tags:
-                        track = "%02d" % int(tags["TRACK"])
-                        
-                    title = ""
-                    if "TITLE" in tags:
-                        title = tags["TITLE"]
-                    elif "title" in tags:
-                        title = tags["title"]
-                    
+                    # Build output file name            
                     outputFile = ""
-                    if artist is not "" and  title is not "":
-                        if track is not "":
-                            outputFile = artist + " - " + track + " - " + title + ".mp3"
+                    tags = getFFProbeTags(inputFile)
+                    if 'artist' in tags and 'title' in tags:
+                        if 'track' in tags:
+                            outputFile = tags['artist'] + " - " + tags['track'] + " - " + tags['title'] + ".mp3"
                         else:
-                            outputFile = artist + " - " + title + ".mp3"
+                            outputFile = tags['artist'] + " - " + tags['title'] + ".mp3"
                     else:                       
                         outputFile =  os.path.join(outRoot,flac.rstrip("flac") + "mp3")
                         
+                    # Build output directory
+                    outputDir = ""
+                    if 'artist' in tags:
+                        outputDir = tags['artist']
+                        if not os.path.isdir(outputDir):
+                            os.mkdir(outputDir)
+                        if 'album' in tags:
+                            if 'date' in tags:
+                                newDir = tags['date'] + " - " + tags['album']
+                            else:
+                                newDir = tags['album']
+                            outputDir = os.path.join(outputDir,newDir)
+                            if not os.path.isdir(outputDir):
+                                os.mkdir(outputDir)
+                                
+                    if outputDir is not "":
+                        outputFile = os.path.join(outputDir,outputFile)
+                        
+                                        
                     # Grab first video stream & first audio stream
+                    dico = getFFProbeDic(inputFile)
                     videoStream = None
                     for stream in dico['streams']:
                         if stream['codec_type'] == 'video':
@@ -73,7 +72,9 @@ def main(pattern):
                     else:
                         vidOpt = "-vn"
                                 
-                    audOpt = "-b:a 192k -sample_fmt s16p -id3v2_version 3 -ar 44100"                                            
+                    audOpt = "-b:a 192k -sample_fmt s16p -id3v2_version 3 -ar 44100 -map_metadata -1"
+                    for t,v in tags.iteritems():
+                        audOpt += " -metadata " + t + "='" + v + "'"                                      
                     
                     d[inputFile] = (outputFile,vidOpt,audOpt)
 
@@ -89,7 +90,7 @@ def main(pattern):
         print "Warning : " + pattern + " was not found in " + FlacZikPath
     else:        
         for path in candidates:
-	    processOneDir(path,todo)
+	           processOneDir(path,todo)
 
     for flac,(mp3,vidOpt,audOpt) in todo.iteritems():
         print "handling " + flac
