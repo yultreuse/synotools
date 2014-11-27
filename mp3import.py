@@ -50,6 +50,7 @@ def main(pattern):
                                 
                     if outputDir is not "":
                         outputFile = os.path.join(outputDir,outputFile)
+                    outputFile = outputFile.replace('"',"'")
                         
                                         
                     # Grab first video stream & first audio stream
@@ -75,7 +76,8 @@ def main(pattern):
                                 
                     audOpt = "-b:a 192k -sample_fmt s16p -id3v2_version 3 -ar 44100 -map_metadata -1"
                     for t,v in tags.iteritems():
-                        audOpt += " -metadata " + t + "='" + v + "'"                                      
+                        v = v.replace('"',"'")
+                        audOpt += ' -metadata ' + t + '="' + v + '"'
                     
                     d[inputFile] = (outputFile,vidOpt,audOpt)
 
@@ -94,8 +96,8 @@ def main(pattern):
 	           processOneDir(path,todo)
 
     for flac,(mp3,vidOpt,audOpt) in todo.iteritems():
-        print "handling " + flac
-        command = 'ffmpeg -y -loglevel quiet -i "' + flac + '" ' + vidOpt + ' ' + audOpt + ' "' + mp3 + '"'        
+        print "handling " + flac + " to " + mp3
+        command = 'ffmpeg -y -loglevel quiet -i "' + flac + '" ' + vidOpt + ' ' + audOpt + ' "' + mp3 + '"'
         os.system(command)
 
 
