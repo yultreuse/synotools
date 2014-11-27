@@ -26,11 +26,11 @@ def main(pattern):
                     tags = getFFProbeTags(inputFile)
                     if 'artist' in tags and 'title' in tags:
                         if 'track' in tags:
-                            outputFile = tags['artist'] + " - " + tags['track'] + " - " + tags['title'] + ".m4a"
+                            outputFile = tags['artist'] + " - " + tags['track'] + " - " + tags['title'] + ".mp4"
                         else:
-                            outputFile = tags['artist'] + " - " + tags['title'] + ".m4a"
+                            outputFile = tags['artist'] + " - " + tags['title'] + ".mp4"
                     else:                       
-                        outputFile =  os.path.join(outRoot,flac.rstrip("flac") + "m4a")
+                        outputFile =  os.path.join(outRoot,flac.rstrip("flac") + "mp4")
                         
                     # Build output directory
                     outputDir = ""
@@ -97,7 +97,7 @@ def main(pattern):
 
     for flac,(mp3,vidOpt,audOpt) in todo.iteritems():
         print "handling " + flac + " to " + mp3
-        command = 'ffmpeg -y -loglevel quiet -i "' + flac + '" ' + vidOpt + ' ' + audOpt + ' "' + mp3 + '"'        
+        command = 'ffmpeg -y -loglevel quiet -i "' + flac + '" ' + vidOpt + ' ' + audOpt + ' "' + mp3 + '"'
         os.system(command)
 
 
