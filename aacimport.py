@@ -35,7 +35,7 @@ def main(pattern):
                     # Build output directory
                     outputDir = ""
                     if 'artist' in tags:
-                        outputDir = tags['artist']
+                        outputDir = tags['artist'].replace("/","-")
                         if not os.path.isdir(outputDir):
                             os.mkdir(outputDir)
                         if 'album' in tags:
@@ -43,6 +43,7 @@ def main(pattern):
                                 newDir = tags['date'] + " - " + tags['album']
                             else:
                                 newDir = tags['album']
+                            newDir = newDir.replace("/","-")
                             outputDir = os.path.join(outputDir,newDir)
                             if not os.path.isdir(outputDir):
                                 os.mkdir(outputDir)

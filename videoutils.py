@@ -63,7 +63,7 @@ def getFFProbeTags(mediaPath):
     albumKeys = ['track']
     for k in albumKeys:
         if k in tags:
-            parsedTags['track'] = "%02d" % int(tags[k].split(";")[0]) 
+            parsedTags['track'] = "%02d" % int((tags[k].split(";")[0]).split("/")[0])
             break
         
     return parsedTags
